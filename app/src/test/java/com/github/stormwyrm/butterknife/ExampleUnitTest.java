@@ -1,4 +1,4 @@
-package com.qingfeng.butterknife;
+package com.github.stormwyrm.butterknife;
 
 import org.junit.Test;
 

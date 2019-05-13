@@ -1,4 +1,4 @@
-package com.qingfeng.compiler;
+package com.github.stormwyrm.butterknife.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.ParameterizedTypeName;

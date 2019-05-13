@@ -1,4 +1,4 @@
-package com.qingfeng.butterknife;
+package com.github.stormwyrm.butterknife;
 
 import android.content.Context;
 import android.support.test.InstrumentationRegistry;

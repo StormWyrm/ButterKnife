@@ -1,4 +1,4 @@
-package com.qingfeng.butterknife2;
+package com.github.stormwyrm.butterknife;
 
 public interface Unbinder {
     void unbind();

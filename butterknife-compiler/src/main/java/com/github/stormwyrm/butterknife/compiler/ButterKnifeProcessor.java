@@ -1,10 +1,11 @@
-package com.qingfeng.compiler;
+package com.github.stormwyrm.butterknife.compiler;
 
 import com.google.auto.service.AutoService;
-import com.qingfeng.lib.annotation.BindView;
+import com.github.stormwyrm.butterknife.annotation.BindView;
 import com.squareup.javapoet.TypeName;
 
 import java.io.IOException;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
@@ -13,15 +14,11 @@ import javax.annotation.processing.AbstractProcessor;
 import javax.annotation.processing.ProcessingEnvironment;
 import javax.annotation.processing.Processor;
 import javax.annotation.processing.RoundEnvironment;
-import javax.annotation.processing.SupportedAnnotationTypes;
-import javax.annotation.processing.SupportedSourceVersion;
 import javax.lang.model.SourceVersion;
 import javax.lang.model.element.Element;
 import javax.lang.model.element.TypeElement;
 
 @AutoService(Processor.class)
-@SupportedAnnotationTypes({"com.qingfeng.lib.annotation.BindView", "com.qingfeng.lib.annotation.BindView"})  //告诉这个实现类,需要监听检索哪些注解
-@SupportedSourceVersion(SourceVersion.RELEASE_7)//最低支持的源码版本,这里是java7
 public class ButterKnifeProcessor extends AbstractProcessor {
     private ProcessingEnvironment processingEnv;
 
@@ -31,6 +28,15 @@ public class ButterKnifeProcessor extends AbstractProcessor {
         this.processingEnv = processingEnv;
     }
 
+    @Override
+    public Set<String> getSupportedAnnotationTypes() {
+        return Collections.singleton(BindView.class.getCanonicalName());
+    }
+
+    @Override
+    public SourceVersion getSupportedSourceVersion() {
+        return SourceVersion.RELEASE_7;
+    }
 
     @Override
     public boolean process(Set<? extends TypeElement> annotations, RoundEnvironment roundEnv) {

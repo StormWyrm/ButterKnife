@@ -1,4 +1,4 @@
-package com.qingfeng.compiler;
+package com.github.stormwyrm.butterknife.compiler;
 
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
@@ -18,9 +18,9 @@ import javax.lang.model.element.TypeElement;
 
 //BindClass用于保存需要生成的代码，里面封装了javapoet相关处理
 public class BindClass {
-    private final ClassName UTILS = ClassName.get("com.qingfeng.butterknife2", "ProcessorUtils");
+    private final ClassName UTILS = ClassName.get("com.github.stormwyrm.butterknife", "ProcessorUtils");
     private final ClassName VIEW = ClassName.get("android.view", "View");
-    private final ClassName UNBINDER = ClassName.get("com.qingfeng.butterknife2", "Unbinder");
+    private final ClassName UNBINDER = ClassName.get("com.github.stormwyrm.butterknife", "Unbinder");
 
     private TypeName targetTypeName;
     private ClassName bindingClassName;
