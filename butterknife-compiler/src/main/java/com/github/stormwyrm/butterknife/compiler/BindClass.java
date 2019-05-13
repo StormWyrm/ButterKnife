@@ -14,6 +14,7 @@ import java.util.List;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.TypeElement;
+import javax.swing.text.View;
 
 
 //BindClass用于保存需要生成的代码，里面封装了javapoet相关处理
@@ -21,11 +22,12 @@ public class BindClass {
     private final ClassName UTILS = ClassName.get("com.github.stormwyrm.butterknife", "ProcessorUtils");
     private final ClassName VIEW = ClassName.get("android.view", "View");
     private final ClassName UNBINDER = ClassName.get("com.github.stormwyrm.butterknife", "Unbinder");
-
+    private final ClassName ONCLICKLISENTER = ClassName.get("android.view.View", "OnClickListener");
     private TypeName targetTypeName;
     private ClassName bindingClassName;
     private boolean isFinal;
     private List<ViewBinding> fields;
+    private List<ClickBinding> methods;
 
     private BindClass(TypeElement enclosingElement) {
         //asType 表示注解所在字段是什么类型(eg. Button TextView)
@@ -47,6 +49,7 @@ public class BindClass {
         this.isFinal = isFinal;
         //用于保存多个注解的信息
         fields = new ArrayList<>();
+        methods = new ArrayList<>();
     }
 
     public static BindClass createBindClass(TypeElement enclosingElement) {
@@ -55,6 +58,10 @@ public class BindClass {
 
     public void addAnnotationField(ViewBinding viewBinding) {
         fields.add(viewBinding);
+    }
+
+    public void addAnnotationMethod(ClickBinding clickBinding) {
+        methods.add(clickBinding);
     }
 
     public JavaFile preJavaFile() {
@@ -66,7 +73,8 @@ public class BindClass {
     private TypeSpec createTypeSpec() {
         TypeSpec.Builder result = TypeSpec.classBuilder(bindingClassName.simpleName())
                 .addSuperinterface(UNBINDER)//父类接口
-                .addField(targetTypeName,"target",Modifier.PRIVATE)
+                .addField(targetTypeName, "target", Modifier.PRIVATE)
+                .addField(VIEW, "source", Modifier.PRIVATE)
                 .addMethod(createUnbinderMethod())
                 .addModifiers(Modifier.PUBLIC);
         if (isFinal) {
@@ -82,14 +90,33 @@ public class BindClass {
         //构造方法有两个参数，target和source，在本例子中，Target就是activity，source就是activity的DecorView
         constructor.addParameter(targetType, "target", Modifier.FINAL);
         constructor.addParameter(VIEW, "source");
-        constructor.addStatement("this.$L = $L","target","target");
+        constructor.addStatement("this.$L = $L", "target", "target");
+        constructor.addStatement("this.$L = $L", "source", "source");
         //可能有多个View需要初始化，也就是说activity中多个字段用到了注解
         for (ViewBinding bindings : fields) {
             //生成方法里的语句，也就是方法体
             addViewBinding(constructor, bindings);
         }
 
+        for (ClickBinding clickBinding : methods) {
+            addClickBinding(constructor, clickBinding);
+        }
         return constructor.build();
+    }
+
+    private void addClickBinding(MethodSpec.Builder builder, ClickBinding clickBinding) {
+        TypeSpec clickLisenter = TypeSpec.anonymousClassBuilder("")
+                .addSuperinterface(ONCLICKLISENTER)
+                .addMethod(
+                        MethodSpec.methodBuilder("onClick")
+                                .addAnnotation(Override.class)
+                                .addModifiers(Modifier.PUBLIC)
+                                .returns(void.class)
+                                .addParameter(VIEW,"v")
+                                .addStatement("target.$L(v)", clickBinding.getMethodName())
+                                .build())
+                .build();
+        builder.addStatement("source.findViewById($L).setOnClickListener($L)",clickBinding.getValue(),clickLisenter);
     }
 
     private MethodSpec createUnbinderMethod() {
@@ -104,6 +131,10 @@ public class BindClass {
         for (ViewBinding binding : fields) {
             unbinder.addStatement("target.$L = null", binding.getName());
         }
+        for (ClickBinding clickBinding : methods) {
+            unbinder.addStatement("source.findViewById($L).setOnClickListener(null)", clickBinding.getValue());
+        }
+        unbinder.addStatement("source = null");
         return unbinder.build();
 
     }

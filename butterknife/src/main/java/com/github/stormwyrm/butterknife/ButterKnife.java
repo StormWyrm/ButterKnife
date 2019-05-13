@@ -13,6 +13,13 @@ public class ButterKnife {
 
     public static Unbinder bind(Activity activity) {
         View decorView = activity.getWindow().getDecorView();
+        new View.OnClickListener(){
+
+            @Override
+            public void onClick(View v) {
+
+            }
+        };
         return bindClass(activity, decorView);
     }
 
